@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { promtRouter } from "./promt";
+import { promptRouter } from "./ prompt";
 const router=Router();
 
 // promt router for receiving user promt 
-router.use("/promt",promtRouter);
+router.use("/promt",promptRouter);
 
 
 export default router;

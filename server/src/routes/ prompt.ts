@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { promptSchema } from "../schema/promtSchema";
+import { promptSchema } from "../schema/promptSchema";
 
-export const promtRouter = Router();
+export const promptRouter = Router();
 
-promtRouter.post("/send", (req, res) => {
+promptRouter.post("/send", (req, res) => {
     const parsedData = promptSchema.safeParse(req.body);
 
     if (!parsedData.success) {
