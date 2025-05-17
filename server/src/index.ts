@@ -1,15 +1,19 @@
 import express from 'express';
 import { config } from './config/env';
+import router from './routes';
+const port=config.PORT;
 
 const app=express();
 
-const port=config.PORT;
+app.use(express.json());
 
 app.get("/test",(req,res)=>{
     res.json({
         message:"Hello World"
     }).status(200);
 })
+
+app.use("/api/v1",router)
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
