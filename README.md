@@ -33,8 +33,8 @@ graph TD;
 
 ## 📌 Roadmap
 
-- [ ] Prompt endpoint for primary backend
-- [ ] Setting up LLM
+- [x] Prompt Reception Server
+- [x] Setting up LLM
 - [ ] Prompt-to-code generation 
 - [ ] Dockerized Python code execution
 - [ ] Frontend UI for prompt submission and preview

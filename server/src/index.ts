@@ -1,7 +1,7 @@
 import express from 'express';
-import { config } from './config/env';
+import { Config } from './config/env';
 import router from './routes';
-const port=config.PORT;
+const port=Config.PORT;
 
 const app=express();
 

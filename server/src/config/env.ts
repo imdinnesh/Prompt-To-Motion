@@ -6,13 +6,16 @@ dotenv.config();
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().default(8080),
+  GEMINI_API_KEY:z.string().min(1, { message: 'GEMINI_API_KEY is required' }),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
 
 if (!parsedEnv.success) {
-  console.error('Invalid environment variables:', parsedEnv.error.format());
+  parsedEnv.error.errors.forEach((error) => {
+    console.error(`Invalid environment variable: ${error.path.join('.')} - ${error.message}`);
+  })
   process.exit(1);
 }
 
-export const config = parsedEnv.data;
+export const Config = parsedEnv.data;

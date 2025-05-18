@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { promptSchema } from "../schema/promptSchema";
+import { generateManimCode } from "../packages/agent";
 
 export const promptRouter = Router();
 
-promptRouter.post("/send", (req, res) => {
+promptRouter.post("/send", async(req, res) => {
     const parsedData = promptSchema.safeParse(req.body);
 
     if (!parsedData.success) {
@@ -16,11 +17,12 @@ promptRouter.post("/send", (req, res) => {
     }
 
     const { prompt } = parsedData.data;
-
+    const text =await generateManimCode(prompt);
     res.status(200).json({
         message: "Prompt received",
         status: "success",
-        data: { prompt },
+        data: prompt,
+        text: text
     });
     return;
 });
