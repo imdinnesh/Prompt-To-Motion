@@ -1,8 +1,8 @@
 import { Queue } from "bullmq";
 import { redis } from "../store/redis";
 
-export const queue_name='prompt-generation' 
-export const queue=new Queue(queue_name,{
+export const QUEUE_NAME='prompt-generation' 
+export const promptQueue=new Queue(QUEUE_NAME,{
     connection:redis
 })
 

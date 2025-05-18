@@ -36,7 +36,8 @@ graph TD;
 - [x] Prompt Reception Server
 - [x] Setting up LLM
 - [x] Queue service 
-- [ ] Prompt-to-code generation 
+- [x] Prompt-to-code generation (worker)
+- [ ] Optimise the LLM logic 
 - [ ] Dockerized Python code execution
 - [ ] Frontend UI for prompt submission and preview
 - [ ] Add user authentication and session tracking
