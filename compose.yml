@@ -1,5 +1,5 @@
 services:
-   redis:
+  redis:
     image: redis:latest
     container_name: prompt_server_redis
     restart: always
@@ -8,6 +8,18 @@ services:
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - prompt_network
+
+  manim:
+    image: manimcommunity/manim
+    container_name: my-manim-container
+    volumes:
+      - "/Users/dinesh/Desktop/Web Projects/Prompt To Motion/python-worker:/manim"
+    working_dir: /manim
+    stdin_open: true
+    tty: true
+    command: bash
     networks:
       - prompt_network
 
