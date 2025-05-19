@@ -29,6 +29,10 @@ export async function generateManimCode(prompt: string): Promise<string> {
         },
     });
 
-    const text = response.text || "";
+    let text = response.text || "";
+    if (text.startsWith("```")) {
+        text = text.replace(/```python\s*([\s\S]*?)\s*```/, "$1").trim();
+    }
+
     return text;
 }
