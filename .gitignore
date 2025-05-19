@@ -2,3 +2,6 @@
 node_modules
 server/.env
 server/dist
+python-worker/media
+python-worker/renders
+python-worker/__pycache__
