@@ -38,7 +38,7 @@ graph TD;
 - [x] Queue service BullMQ 
 - [x] Prompt-to-code generation (worker)
 - [x] Optimise the LLM logic 
-- [ ] Dockerized Python code execution
+- [x] Dockerized Python code execution
 - [ ] Frontend UI for prompt submission and preview
 - [ ] Add user authentication and session tracking
 - [ ] Implement animation history and playback

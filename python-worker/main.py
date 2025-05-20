@@ -56,7 +56,7 @@ def process_job(job_id):
 
     if result.returncode == 0:
         # Build the expected output path inside host
-        output_file = os.path.join(job_dir, "media", "videos", "scene", "480p15", f"{class_name}.mp4")
+        output_file = os.path.join(job_dir, "media", "videos", "scene", "720p30", f"{class_name}.mp4")
         r.set(f"job:{job_id}:status", "completed")
         r.set(f"job:{job_id}:output", output_file)
         print(f"✅ Render complete for job {job_id}")
