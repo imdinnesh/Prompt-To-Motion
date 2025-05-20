@@ -1,3 +1,10 @@
+# Python 
+
+- Continuously checks Redis for render jobs.
+- It takes the Python code stored in Redis, saves it to a file
+- Then runs a Manim rendering command inside a Docker container to produce a video
+- It updates the job status in Redis as it progresses.
+
 ## Instructions for Manim
 ```bash
 docker compose up -d
