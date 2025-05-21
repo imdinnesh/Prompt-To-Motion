@@ -24,6 +24,8 @@ worker.on("completed", (job) => {
     console.log(`Job ${job.id} completed`);
 });
 
-worker.on("failed", (job, err) => {
+worker.on("failed",async (job, err) => {
+    const jobKey = `job:${job?.id}`;
+    await redis.set(`${jobKey}:status`, "failed");
     console.error(`Job ${job?.id} failed:`, err);
 });

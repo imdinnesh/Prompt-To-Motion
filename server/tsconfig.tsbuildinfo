@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/config/env.ts","./src/packages/agent.ts","./src/queue/index.ts","./src/routes/ prompt.ts","./src/routes/index.ts","./src/schema/promptschema.ts","./src/store/redis.ts","./src/worker/worker.ts"],"version":"5.8.3"}
+{"root":["./src/index.ts","./src/config/env.ts","./src/packages/agent.ts","./src/queue/index.ts","./src/routes/ prompt.ts","./src/routes/index.ts","./src/routes/status.ts","./src/schema/promptschema.ts","./src/store/redis.ts","./src/worker/worker.ts"],"version":"5.8.3"}

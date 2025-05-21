@@ -40,6 +40,7 @@ graph TD;
 - [x] Optimise the LLM logic 
 - [x] Dockerized Python code execution
 - [x] Add a storage layer
+- [x] Expose a SSE /status endpoint
 - [ ] Frontend UI for prompt submission and preview
 - [ ] Add user authentication and session tracking
 - [ ] Implement animation history and playback
