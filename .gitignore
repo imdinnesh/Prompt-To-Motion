@@ -5,3 +5,5 @@ server/dist
 python-worker/media
 python-worker/renders
 python-worker/__pycache__
+python-worker/store/store.py
+python-worker/.env

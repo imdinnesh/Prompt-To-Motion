@@ -39,6 +39,7 @@ graph TD;
 - [x] Prompt-to-code generation (worker)
 - [x] Optimise the LLM logic 
 - [x] Dockerized Python code execution
+- [x] Add a storage layer
 - [ ] Frontend UI for prompt submission and preview
 - [ ] Add user authentication and session tracking
 - [ ] Implement animation history and playback
