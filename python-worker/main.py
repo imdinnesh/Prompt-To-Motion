@@ -56,9 +56,13 @@ def process_job(job_id):
     container_file_path = os.path.join("/manim", file_path)
 
     # Run manim render command inside Docker container (non-interactive)
+
+    # The commnands are -ql for low quality 480p15
+    #                   -qm for medium quality 720p30
+    # The corresponding file name is to be used in the docker command
     docker_command = [
         "docker", "exec", "-i", "my-manim-container",
-        "manim", "-qm", container_file_path, class_name
+        "manim", "-ql", container_file_path, class_name
     ]
 
     result = subprocess.run(
@@ -70,9 +74,9 @@ def process_job(job_id):
 
     if result.returncode == 0:
         # Build the expected output path inside host
-        # Manim's default output structure: media/videos/{scene_name}/720p30/{class_name}.mp4
+        # Manim's default output structure: media/videos/{scene_name}/480p15/{class_name}.mp4
         # Assuming 'media' is a top-level directory sibling to 'renders' on the host
-        output_file_path = os.path.join("media", "videos", "scene", "720p30", f"{class_name}.mp4")
+        output_file_path = os.path.join("media", "videos", "scene", "480p15", f"{class_name}.mp4")
 
         if os.path.exists(output_file_path):
             print(f"Video rendered successfully: {output_file_path}")
