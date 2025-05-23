@@ -4,23 +4,17 @@ import redis
 import subprocess
 from datetime import datetime
 from dotenv import load_dotenv
-from imagekitio import ImageKit
-from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
+from upload_providers.factory import get_uploader
 
-load_dotenv()  # Loads variables from .env into the environment
-private_key = os.getenv('PRIVATE_KEY')
-public_key = os.getenv('PUBLIC_KEY')
-url_endpoint = os.getenv('URL_ENDPOINT')
+load_dotenv()
 
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
-imagekit = ImageKit(
-    private_key=private_key,
-    public_key=public_key,
-    url_endpoint=url_endpoint
-)
-
 print("Python render worker started.")
+
+# Select upload provider from environment
+UPLOAD_PROVIDER = os.getenv("UPLOAD_PROVIDER", "imagekit")
+uploader = get_uploader(UPLOAD_PROVIDER)
 
 def process_job(job_id):
     print(f"Found render job: {job_id}")
@@ -38,7 +32,6 @@ def process_job(job_id):
     with open(file_path, 'w') as f:
         f.write(code)
 
-    # Parse class name from the code
     class_name = None
     for line in code.splitlines():
         if line.strip().startswith("class ") and "(Scene)" in line:
@@ -52,14 +45,7 @@ def process_job(job_id):
 
     print(f"Rendering class {class_name} from job {job_id}...")
 
-    # Absolute path to the file inside the container
     container_file_path = os.path.join("/manim", file_path)
-
-    # Run manim render command inside Docker container (non-interactive)
-
-    # The commnands are -ql for low quality 480p15
-    #                   -qm for medium quality 720p30
-    # The corresponding file name is to be used in the docker command
     docker_command = [
         "docker", "exec", "-i", "my-manim-container",
         "manim", "-ql", container_file_path, class_name
@@ -73,66 +59,44 @@ def process_job(job_id):
     )
 
     if result.returncode == 0:
-        # Build the expected output path inside host
-        # Manim's default output structure: media/videos/{scene_name}/480p15/{class_name}.mp4
-        # Assuming 'media' is a top-level directory sibling to 'renders' on the host
         output_file_path = os.path.join("media", "videos", "scene", "480p15", f"{class_name}.mp4")
-
         if os.path.exists(output_file_path):
             print(f"Video rendered successfully: {output_file_path}")
             try:
-                # Prepare options for ImageKit upload
-                options = UploadFileRequestOptions(
-                    folder="/manim-renders",  # Optional: Organize uploads into a specific folder
-                    is_private_file=False,    # Set to True if you want the file to be private
-                    use_unique_file_name=True # ImageKit will generate a unique name if True
-                )
-                
-                # Upload the video to ImageKit
-                print(f"Attempting to upload {output_file_path} to ImageKit...")
-                upload_response = imagekit.upload_file(
-                    file=open(output_file_path, 'rb'),  # Open the file in binary read mode
-                    file_name=f"{job_id}-{class_name}.mp4", # Desired file name on ImageKit
-                    options=options
-                )
+                print(f"Uploading using provider: {UPLOAD_PROVIDER}")
+                upload_info = uploader.upload(output_file_path, job_id, class_name)
 
-                if upload_response and upload_response.url:
-                    print(f"Video uploaded to ImageKit: {upload_response.url}")
-                    r.set(f"job:{job_id}:status", "completed")
-                    r.set(f"job:{job_id}:output_local", output_file_path) # Keep local path for reference
-                    r.set(f"job:{job_id}:output_imagekit_url", upload_response.url)
-                    r.set(f"job:{job_id}:output_imagekit_file_id", upload_response.file_id)
-                else:
-                    print(f"ImageKit upload failed for job {job_id}. Response: {upload_response}")
-                    r.set(f"job:{job_id}:status", "completed_with_upload_error")
-                    r.set(f"job:{job_id}:output_local", output_file_path)
-                    r.set(f"job:{job_id}:error", "ImageKit upload failed or returned no URL.")
+                r.set(f"job:{job_id}:status", "completed")
+                r.set(f"job:{job_id}:output_local", output_file_path)
+                r.set(f"job:{job_id}:output_url", upload_info["url"])
+                r.set(f"job:{job_id}:output_file_id", upload_info["file_id"])
+                r.set(f"job:{job_id}:provider", upload_info["provider"])
 
-            except Exception as upload_e:
-                print(f"Error uploading video to ImageKit for job {job_id}: {upload_e}")
+                print(f"Uploaded successfully: {upload_info['url']}")
+
+            except Exception as e:
+                print(f"Upload failed: {e}")
                 r.set(f"job:{job_id}:status", "completed_with_upload_error")
                 r.set(f"job:{job_id}:output_local", output_file_path)
-                r.set(f"job:{job_id}:error", f"ImageKit upload exception: {upload_e}")
+                r.set(f"job:{job_id}:error", f"{UPLOAD_PROVIDER} upload error: {e}")
         else:
-            print(f"Render reported success, but output file not found: {output_file_path}")
+            print(f"Output file not found: {output_file_path}")
             r.set(f"job:{job_id}:status", "error: output file not found")
-            r.set(f"job:{job_id}:error", "Manim render succeeded, but video file was not found.")
+            r.set(f"job:{job_id}:error", "Render succeeded, file missing.")
     else:
+        print(f"Render failed:\n{result.stderr}")
         r.set(f"job:{job_id}:status", "error")
         r.set(f"job:{job_id}:error", result.stderr)
-        print(f"Render failed for job {job_id}:\n{result.stderr}")
 
-# Poll Redis for jobs
 while True:
     try:
-        # Use scan_iter for efficient iteration over keys
         for key in r.scan_iter("job:*:status"):
             if r.get(key) == "ready_for_render":
                 job_id = key.split(":")[1]
                 print(f"Processing job {job_id}...")
-                r.set(key, "rendering") # Set status to rendering immediately
+                r.set(key, "rendering")
                 process_job(job_id)
-        time.sleep(3) # Wait for 3 seconds before next scan
+        time.sleep(3)
     except Exception as e:
-        print(f"Error in worker loop: {e}")
-        time.sleep(5) # Wait longer on error to avoid rapid retries
+        print(f"Worker error: {e}")
+        time.sleep(5)
