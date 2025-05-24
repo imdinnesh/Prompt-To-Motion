@@ -5,7 +5,6 @@ import { ArrowRight, Loader2, CheckCircle2, XCircle, Clock, RefreshCw, Sparkles,
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -22,19 +21,13 @@ export default function Home() {
   const [status, setStatus] = useState<JobStatus>("")
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [progress, setProgress] = useState(0)
 
   const handleSubmit = async () => {
     setIsLoading(true)
     setStatus("")
     setVideoUrl(null)
     setError(null)
-    setProgress(0)
 
-    // toast({
-    //   title: "Generation started",
-    //   description: "We're processing your mathematical animation request.",
-    // })
 
     toast.success("We're processing your mathematical animation request.")
 
@@ -81,21 +74,12 @@ export default function Home() {
       const data = JSON.parse(event.data)
       setStatus(data.status)
 
-      // Update progress based on status
-      if (data.status === "pending") setProgress(25)
-      if (data.status === "processing") setProgress(75)
-
-      // toast({
-      //   title: "Status update",
-      //   description: `Animation is now ${data.status}`,
-      // })
       toast.info(`Animation is now ${data.status}`)
     })
 
     eventSource.addEventListener("done", (event) => {
       const data = JSON.parse(event.data)
       setStatus("completed")
-      setProgress(100)
       setVideoUrl(data.video_url || null)
       setIsLoading(false)
       eventSource.close()
@@ -112,47 +96,11 @@ export default function Home() {
       console.error("SSE Error:", event)
       setError("Something went wrong while listening for job updates.")
       setStatus("failed")
-      setProgress(0)
       setIsLoading(false)
       eventSource.close()
 
-      // toast({
-      //   title: "Generation failed",
-      //   description: "There was an error processing your request.",
-      //   variant: "destructive",
-      // })
       toast.error("There was an error processing your request.")
     })
-  }
-
-  const getStatusIcon = () => {
-    switch (status) {
-      case "pending":
-        return <Clock className="h-5 w-5 text-yellow-500" />
-      case "processing":
-        return <RefreshCw className="h-5 w-5 text-blue-500 animate-spin" />
-      case "completed":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />
-      case "failed":
-        return <XCircle className="h-5 w-5 text-red-500" />
-      default:
-        return null
-    }
-  }
-
-  const getStatusText = () => {
-    switch (status) {
-      case "pending":
-        return "Preparing your animation..."
-      case "processing":
-        return "Generating mathematical animation..."
-      case "completed":
-        return "Your animation is ready!"
-      case "failed":
-        return "Generation failed"
-      default:
-        return ""
-    }
   }
 
   const getStatusBadge = () => {
@@ -280,16 +228,6 @@ export default function Home() {
                 </div>
               </TabsContent>
             </Tabs>
-
-            {(status || isLoading) && (
-              <div className="space-y-3 mt-6 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-2">
-                  {getStatusIcon()}
-                  <span className="font-medium">{getStatusText()}</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-              </div>
-            )}
 
             {error && (
               <Alert variant="destructive">
