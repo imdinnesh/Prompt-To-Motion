@@ -64,6 +64,7 @@ def process_job(job_id):
             print(f"Video rendered successfully: {output_file_path}")
             try:
                 print(f"Uploading using provider: {UPLOAD_PROVIDER}")
+                r.set(f"job:{job_id}:status", "uploading")
                 upload_info = uploader.upload(output_file_path, job_id, class_name)
 
                 r.set(f"job:{job_id}:status", "completed")
