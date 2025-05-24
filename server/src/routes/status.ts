@@ -26,7 +26,7 @@ statusRouter.get("/job/:jobId", async (req, res) => {
             send("status", { status });
 
             if (status === "completed") {
-                const url = await redis.get(`${redisKey}:output_imagekit_url`);
+                const url = await redis.get(`${redisKey}:output_url`);
                 send("done", { video_url: url });
                 clearInterval(interval);
                 res.end();
