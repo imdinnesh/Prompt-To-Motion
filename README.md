@@ -20,16 +20,16 @@
 ## 🏗️ Architecture Overview
 
 ```mermaid
-graph TD;
-    A[User Prompt] --> B[Frontend (Next.js)];
-    B --> C[Backend (Express.js API)];
-    C --> D[AI Code Generator (LLM)];
-    D --> E[Python Code Executor (Docker Sandbox)];
-    E --> F[Rendered Animation (MP4/GIF)];
-    F --> G[Storage (S3 / MinIO)];
-    G --> B;
-```
-
+flowchart TD
+    A[Start] --> B[User submits prompt]
+    B --> C[Next.js Frontend]
+    C --> D[Express.js Backend]
+    D --> E[LLM generates Python code]
+    E --> F[Run Python code in Docker]
+    F --> G[Render Animation MP4/GIF]
+    G --> H[Upload to Cloundnary / ImageKit]
+    H --> I[User downloads animation]
+    I --> J[End]
 
 ## 📌 Roadmap
 
