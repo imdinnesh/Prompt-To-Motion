@@ -30,7 +30,7 @@ flowchart TD
     G --> H[Upload to Cloundnary / ImageKit]
     H --> I[User downloads animation]
     I --> J[End]
-
+```
 ## 📌 Roadmap
 
 - [x] Prompt Reception Server
