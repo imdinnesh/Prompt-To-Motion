@@ -24,12 +24,22 @@ flowchart TD
     A[Start] --> B[User submits prompt]
     B --> C[Next.js Frontend]
     C --> D[Express.js Backend]
-    D --> E[LLM generates Python code]
-    E --> F[Run Python code in Docker]
-    F --> G[Render Animation MP4/GIF]
-    G --> H[Upload to Cloundnary / ImageKit]
-    H --> I[User downloads animation]
-    I --> J[End]
+    D --> E[Store prompt in Redis cache]
+    E --> F[Publish task to Message Queue - BullMQ]
+    F --> G[Worker: Fetch task from Queue]
+    G --> H[LLM generates Python code]
+    H --> I[Run code in Docker sandbox]
+    I --> J[Generate animation - MP4 or GIF]
+
+    J --> K[Upload to Cloudinary / ImageKit]
+    K --> L[Store animation metadata in Redis/PostgreSQL]
+
+    L --> M[Notify Backend of completion]
+    M --> N[Backend informs Frontend via SSE]
+    N --> O[User downloads animation]
+
+    O --> P[End]
+
 ```
 ## 📌 Roadmap
 
