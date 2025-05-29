@@ -51,10 +51,17 @@ flowchart TD
 - [x] Dockerized Python code execution
 - [x] Add a storage layer
 - [x] Expose a SSE /status endpoint
-- [ ] Frontend UI for prompt submission and preview
+- [x] Frontend UI for prompt submission and preview
 - [ ] Add user authentication and session tracking
 - [ ] Implement animation history and playback
 - [ ] Optimize sandbox rendering pipeline
 - [ ] Add support for background music and voiceovers
 - [ ] Enable advanced controls for timing, camera, and effects
+
+## Demo Video
+
+<video controls width="600">
+  <source src="assets/demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 

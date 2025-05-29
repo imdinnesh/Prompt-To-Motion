@@ -8,3 +8,4 @@ python-worker/__pycache__
 python-worker/store/store.py
 python-worker/.env
 python-worker/upload_providers/__pycache__
+python-worker/.cache
