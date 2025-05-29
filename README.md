@@ -61,7 +61,7 @@ flowchart TD
 ## Demo Video
 
 <video controls width="600">
-  <source src="assets/demo.mp4" type="video/mp4">
+  <source src="https://github.com/user-attachments/assets/205aad4b-5c97-406a-baeb-159d2023bc13" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
