@@ -16,6 +16,7 @@ import {
   Pause,
   Volume2,
   VolumeX,
+  Bot,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -103,7 +104,7 @@ export default function Home() {
     setError(null)
     setProgress(0)
 
-    toast.success("We're processing your mathematical animation request.")
+    toast.info("Your animation request has been submitted.")
 
     const headers = new Headers()
     headers.append("Content-Type", "application/json")
@@ -138,7 +139,6 @@ export default function Home() {
   }
 
   const listenToJobStatus = (jobId: string) => {
-    // Close existing connection if any
     if (eventSourceRef.current) {
       eventSourceRef.current.close()
     }
@@ -152,14 +152,11 @@ export default function Home() {
       try {
         const data = JSON.parse(event.data)
         setStatus(data.status)
-
-        // Update progress based on status
         if (data.status === "pending") setProgress(10)
         else if (data.status === "ready_for_render") setProgress(25)
         else if (data.status === "rendering") setProgress(50)
         else if (data.status === "uploading") setProgress(75)
-
-        toast.info(`Animation is now ${data.status}`)
+        toast.info(`Update: Animation is now ${data.status.replace("_", " ")}`)
       } catch (error) {
         console.error("Failed to parse status event:", error)
       }
@@ -183,12 +180,10 @@ export default function Home() {
         setIsLoading(false)
         eventSource.close()
         eventSourceRef.current = null
-
         if (data.video_url) {
           saveToHistory(prompt, data.video_url)
         }
-
-        toast.success("Your mathematical animation is ready to view.")
+        toast.success("Your mathematical animation is ready!")
       } catch (error) {
         console.error("Failed to parse done event:", error)
         setError("Failed to process completion data")
@@ -199,54 +194,45 @@ export default function Home() {
 
     eventSource.addEventListener("error", (event) => {
       console.error("SSE Error:", event)
-      setError("Connection lost while processing. Please try again.")
+      setError("Connection lost during generation. Please try again.")
       setStatus("failed")
       setIsLoading(false)
       eventSource.close()
       eventSourceRef.current = null
-      toast.error("There was an error processing your request.")
+      toast.error("An error occurred while processing your request.")
     })
 
-    // Handle connection errors
     eventSource.onerror = () => {
       if (eventSource.readyState === EventSource.CLOSED) {
-        console.log("EventSource connection closed")
+        console.log("EventSource connection was closed.")
       }
     }
   }
 
   const getStatusBadge = () => {
+    const commonClasses = "text-xs"
     const badges = {
       pending: (
-        <Badge
-          variant="outline"
-          className="bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300"
-        >
-          <Clock className="w-3 h-3 mr-1" />
+        <Badge variant="secondary" className={commonClasses}>
+          <Clock className="w-3 h-3 mr-1.5" />
           Pending
         </Badge>
       ),
       processing: (
-        <Badge
-          variant="outline"
-          className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300"
-        >
-          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+        <Badge variant="secondary" className={commonClasses}>
+          <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
           Processing
         </Badge>
       ),
       completed: (
-        <Badge
-          variant="outline"
-          className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300"
-        >
-          <CheckCircle2 className="w-3 h-3 mr-1" />
+        <Badge variant="secondary" className={commonClasses}>
+          <CheckCircle2 className="w-3 h-3 mr-1.5" />
           Completed
         </Badge>
       ),
       failed: (
-        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300">
-          <XCircle className="w-3 h-3 mr-1" />
+        <Badge variant="destructive" className={commonClasses}>
+          <XCircle className="w-3 h-3 mr-1.5" />
           Failed
         </Badge>
       ),
@@ -258,9 +244,9 @@ export default function Home() {
     if (videoUrl) {
       try {
         await navigator.clipboard.writeText(videoUrl)
-        toast.success("Video URL copied to clipboard")
+        toast.success("Video URL copied to clipboard.")
       } catch (error) {
-        toast.error("Failed to copy URL")
+        toast.error("Failed to copy URL.")
       }
     }
   }
@@ -273,7 +259,7 @@ export default function Home() {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      toast.success("Download started")
+      toast.success("Download started.")
     }
   }
 
@@ -295,11 +281,7 @@ export default function Home() {
 
   const togglePlayPause = () => {
     if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause()
-      } else {
-        videoRef.current.play()
-      }
+      isPlaying ? videoRef.current.pause() : videoRef.current.play()
       setIsPlaying(!isPlaying)
     }
   }
@@ -328,60 +310,57 @@ export default function Home() {
 
   return (
     <TooltipProvider>
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-8 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Main Card */}
-          <Card className="shadow-xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-            <CardHeader className="space-y-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-3xl font-bold flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                    <Sparkles className="h-6 w-6 text-white" />
+      <main className="min-h-screen w-full bg-background text-foreground flex items-center justify-center p-4">
+        <div className="w-full max-w-3xl mx-auto">
+          <Card className="shadow-2xl shadow-primary/10">
+            <CardHeader className="p-8">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-lg border flex items-center justify-center bg-card">
+                    <Sparkles className="h-6 w-6 text-primary" />
                   </div>
-                  Mathematical Animation Generator
-                </CardTitle>
+                  <div>
+                    <CardTitle className="text-2xl font-bold tracking-tighter">
+                      Mathematical Animation Generator
+                    </CardTitle>
+                    <CardDescription className="text-base text-muted-foreground mt-1">
+                      Describe a concept and watch it come to life with AI.
+                    </CardDescription>
+                  </div>
+                </div>
                 {status && getStatusBadge()}
               </div>
-              <CardDescription className="text-lg">
-                Create stunning mathematical animations with AI-powered generation
-              </CardDescription>
-
-              {/* Progress Bar */}
               {isLoading && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>Generating your animation...</span>
-                    <span>{progress}%</span>
-                  </div>
+                <div className="space-y-2 pt-6">
                   <Progress value={progress} className="h-2" />
+                  <p className="text-sm text-muted-foreground text-center">
+                    Generating your animation... {progress}%
+                  </p>
                 </div>
               )}
             </CardHeader>
 
-            <CardContent className="space-y-6">
-              <Tabs defaultValue="create" className="w-full">
+            <CardContent className="p-8 pt-0">
+              <Tabs defaultValue="create">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="create">Create Animation</TabsTrigger>
+                  <TabsTrigger value="create">Create</TabsTrigger>
                   <TabsTrigger value="examples">Examples</TabsTrigger>
                   <TabsTrigger value="history">History</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="create" className="space-y-4 mt-6">
-                  <div className="space-y-3">
-                    <label htmlFor="prompt" className="text-sm font-medium">
-                      Describe your mathematical animation
-                    </label>
+                <TabsContent value="create" className="mt-6">
+                  <div className="space-y-4">
                     <Textarea
                       id="prompt"
-                      placeholder="Describe the mathematical animation you want to create. Be specific about mathematical concepts, visual effects, and motion patterns..."
+                      placeholder="e.g., A visualization of the Lorenz attractor with a comet-like tail..."
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                       disabled={isLoading}
-                      className="min-h-[100px] resize-none"
+                      className="min-h-[120px] text-base"
                       maxLength={500}
                     />
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">{prompt.length}/500 characters</span>
+                      <span className="text-xs text-muted-foreground">{prompt.length}/500</span>
                       <div className="flex gap-2">
                         {status === "failed" && (
                           <Button variant="outline" onClick={retryGeneration} className="gap-2">
@@ -392,18 +371,15 @@ export default function Home() {
                         <Button
                           onClick={handleSubmit}
                           disabled={isLoading || !prompt.trim()}
-                          className="gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                           size="lg"
+                          className="gap-2"
                         >
                           {isLoading ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Generating...
-                            </>
+                            <Loader2 className="h-5 w-5 animate-spin" />
                           ) : (
                             <>
-                              Generate Animation
-                              <ArrowRight className="h-4 w-4" />
+                              Generate
+                              <ArrowRight className="h-5 w-5" />
                             </>
                           )}
                         </Button>
@@ -413,142 +389,106 @@ export default function Home() {
                 </TabsContent>
 
                 <TabsContent value="examples" className="mt-6">
-                  <div className="grid gap-3">
-                    <p className="text-sm text-muted-foreground mb-3">Click any example to use it as your prompt:</p>
-                    {examplePrompts.map((examplePrompt, index) => (
-                      <Button
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Click an example to load it into the prompt editor.
+                    </p>
+                    {examplePrompts.map((p, index) => (
+                      <button
                         key={index}
-                        variant="outline"
-                        className="justify-start h-auto py-4 px-4 text-left hover:bg-blue-50 dark:hover:bg-blue-950"
-                        onClick={() => setPrompt(examplePrompt)}
+                        className="w-full text-left p-3 rounded-md hover:bg-muted transition-colors flex items-start gap-3"
+                        onClick={() => setPrompt(p)}
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-xs font-medium text-blue-600 dark:text-blue-400 mt-0.5">
-                            {index + 1}
-                          </div>
-                          <span className="flex-1">{examplePrompt}</span>
-                        </div>
-                      </Button>
+                        <Bot className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm">{p}</span>
+                      </button>
                     ))}
                   </div>
                 </TabsContent>
 
                 <TabsContent value="history" className="mt-6">
-                  <div className="space-y-3">
+                  <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
                     {history.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                        <p>No animations generated yet</p>
-                        <p className="text-sm">Your generation history will appear here</p>
+                      <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
+                        <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="font-semibold">No History</p>
+                        <p className="text-sm">Your past generations will appear here.</p>
                       </div>
                     ) : (
                       history.map((item) => (
-                        <Card key={item.id} className="p-4 hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <p className="font-medium truncate">{item.prompt}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {item.timestamp.toLocaleDateString()} at {item.timestamp.toLocaleTimeString()}
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button variant="outline" size="sm" onClick={() => setPrompt(item.prompt)}>
-                                Reuse
-                              </Button>
-                              <Button variant="outline" size="sm" onClick={() => setVideoUrl(item.videoUrl)}>
-                                View
-                              </Button>
-                            </div>
+                        <div key={item.id} className="p-3 rounded-md border flex items-center justify-between">
+                          <div className="flex-1 overflow-hidden">
+                            <p className="font-medium truncate text-sm">{item.prompt}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {item.timestamp.toLocaleString()}
+                            </p>
                           </div>
-                        </Card>
+                          <div className="flex gap-2 ml-4">
+                            <Button variant="ghost" size="sm" onClick={() => setPrompt(item.prompt)}>
+                              Reuse
+                            </Button>
+                            <Button variant="secondary" size="sm" onClick={() => setVideoUrl(item.videoUrl)}>
+                              View
+                            </Button>
+                          </div>
+                        </div>
                       ))
                     )}
                   </div>
                 </TabsContent>
               </Tabs>
-
               {error && (
-                <Alert variant="destructive">
+                <Alert variant="destructive" className="mt-6">
                   <XCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
+                  <AlertTitle>Generation Failed</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
             </CardContent>
 
             {videoUrl && (
-              <CardFooter className="flex flex-col items-start pt-0 space-y-4">
-                <div className="flex items-center justify-between w-full">
-                  <h3 className="text-xl font-semibold flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    Your Animation
-                  </h3>
-                  <div className="flex gap-2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="icon" onClick={togglePlayPause}>
-                          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{isPlaying ? "Pause" : "Play"}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="icon" onClick={toggleMute}>
-                          {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{isMuted ? "Unmute" : "Mute"}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="icon" onClick={downloadVideo}>
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Download video</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="icon" onClick={copyVideoUrl}>
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Copy video URL</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="icon" onClick={shareVideo}>
-                          <Share2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Share animation</p>
-                      </TooltipContent>
-                    </Tooltip>
+              <CardFooter className="flex flex-col items-start p-8 pt-0 space-y-4">
+                <div className="w-full border-t pt-6">
+                  <div className="flex items-center justify-between w-full mb-4">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      Animation Ready
+                    </h3>
+                    <div className="flex gap-1">
+                      {[
+                        { icon: isPlaying ? Pause : Play, label: isPlaying ? "Pause" : "Play", action: togglePlayPause },
+                        { icon: isMuted ? VolumeX : Volume2, label: isMuted ? "Unmute" : "Mute", action: toggleMute },
+                        { icon: Download, label: "Download", action: downloadVideo },
+                        { icon: Copy, label: "Copy URL", action: copyVideoUrl },
+                        { icon: Share2, label: "Share", action: shareVideo },
+                      ].map((btn, i) => (
+                        <Tooltip key={i}>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={btn.action}>
+                              <btn.icon className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{btn.label}</p></TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className="w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-black shadow-lg">
-                  <video
-                    ref={videoRef}
-                    src={videoUrl}
-                    controls
-                    autoPlay
-                    className="w-full h-auto"
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                    onVolumeChange={(e) => setIsMuted((e.target as HTMLVideoElement).muted)}
-                  >
-                    Your browser does not support the video tag.
-                  </video>
+                  <div className="w-full overflow-hidden rounded-lg border bg-black shadow-inner">
+                    <video
+                      ref={videoRef}
+                      src={videoUrl}
+                      controls={false} // Disable default controls for a cleaner look
+                      autoPlay
+                      loop
+                      muted={isMuted}
+                      className="w-full h-auto aspect-video"
+                      onPlay={() => setIsPlaying(true)}
+                      onPause={() => setIsPlaying(false)}
+                      onVolumeChange={(e) => setIsMuted((e.target as HTMLVideoElement).muted)}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
                 </div>
               </CardFooter>
             )}
