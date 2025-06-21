@@ -1,6 +1,7 @@
 // FILE: src/packages/agent.ts
 import { GoogleGenerativeAI, Content } from "@google/generative-ai"; // <-- Correct package name
 import { Config } from "../config/env";
+import { redisPublisher } from "../store/redis";
 
 // It's better to initialize the client once and reuse it.
 const genAI = new GoogleGenerativeAI(Config.GEMINI_API_KEY);
@@ -46,39 +47,33 @@ class CircleToSquare(Scene):
     },
 ];
 
-export async function generateManimCode(prompt: string): Promise<string> {
-    console.log("Generating Manim code for prompt:", prompt);
-    
-    try {
-        const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash-latest",
-            systemInstruction: MANIM_SYSTEM_INSTRUCTION,
-        });
+export async function generateManimCodeStream(prompt: string, jobId: string): Promise<string> {
+    const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash-latest",
+        systemInstruction: MANIM_SYSTEM_INSTRUCTION,
+    });
 
-        const chat = model.startChat({
-            history: MANIM_FEW_SHOT_EXAMPLE,
-        });
+    const resultStream = await model.generateContentStream({
+        contents: [
+            ...MANIM_FEW_SHOT_EXAMPLE,
+            {
+                role: "user",
+                parts: [{ text: prompt }]
+            }
+        ]
+    });
 
-        const result = await chat.sendMessage(prompt);
-        const response = result.response;
-        let text = response.text();
-        
-        console.log("Raw AI Response:\n", text);
+    let fullCode = "";
 
-        // Clean up any markdown formatting that might be present
-        if (text.startsWith("```")) {
-            text = text.replace(/^```(?:python)?\s*([\s\S]*?)\s*```$/i, "$1").trim();
+    for await (const chunk of resultStream.stream) {
+        const text = chunk.text();
+        if (text) {
+            fullCode += text;
+
+            // Publish chunk to Redis Pub/Sub
+            await redisPublisher.publish(`job:${jobId}:stream`, text);
         }
-
-        return text;
-    } catch (error) {
-        console.error("Error generating Manim code:", error);
-        return `from manim import *
-
-class GenerationError(Scene):
-    def construct(self):
-        error_text = Text("Failed to generate Manim code.\\nCheck the logs for details.", color=RED, font_size=36)
-        self.add(error_text)
-`;
     }
+
+    return fullCode.trim();
 }
