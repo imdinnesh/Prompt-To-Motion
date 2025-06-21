@@ -62,3 +62,47 @@ flowchart TD
 
 [![Watch the demo](assets/demo.png)](https://github.com/user-attachments/assets/205aad4b-5c97-406a-baeb-159d2023bc13)
 
+## Sample Prompts
+
+Category 1: Basic Shapes & Transformations
+
+These are the fundamental building blocks and are great for a first test.
+
+- A circle transforming into a square.
+Show a blue square moving from the left side of the screen to the right.
+- A red triangle that rotates 360 degrees around its center.
+- Three circles of different colors appearing one after the other.
+- A green star that fades into view and then fades out.
+Animate a square getting larger and then smaller.
+
+Category 2: Text & Formulas (LaTeX)
+
+Manim excels at typesetting beautiful mathematics.
+
+- Write the text 'Hello, Manim' in the center of the screen.
+- Animate the Pythagorean theorem, a^2 + b^2 = c^2, appearing on screen.
+- Display the quadratic formula, and then highlight the 'b^2 - 4ac' part in yellow.
+- Show the words 'Calculus' and 'Algebra' on screen, then swap their positions.
+- Write the formula for Euler's Identity, e^{i\pi} + 1 = 0.
+
+Category 3: Graphs & Functions
+
+Visualizing functions is a core feature of Manim.
+
+- Draw a graph of a sine wave from x=0 to x=2*pi.
+- Plot the function y = x^2 from x=-3 to x=3.
+- Create a number line from -5 to 5, and then place a glowing dot at the number 3.
+- Animate a dot moving along the path of a parabola.
+- Show the graphs of y = sin(x) and y = cos(x) on the same axes.
+
+Category 4: More Conceptual Animations
+
+These combine a few simple ideas to create a more interesting scene.
+
+- Illustrate the concept of Pi by unrolling a circle's circumference.
+
+- A visualization of the Lorenz attractor, showing a point tracing its butterfly-wing path. (The classic example!)
+
+- Create a 3x3 grid of squares, and then have the center square light up in gold.
+- Show a line segment that represents a radius rotating to draw a full circle.
+- Animate a right-angled triangle appearing, then show squares being drawn on each of its three sides.
